@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Pinned by digest (python:3.11-slim-trixie as of 2026-09-06). 3.11 is the
-# ceiling for Django 4.1 (see docs/APP_CHANGES.md for why Django isn't
+# ceiling for Django 4.1 (see APP_CHANGES.md for why Django isn't
 # upgraded); trixie because Debian bookworm's standard support window ended
 # 2026-07-11.
 ARG PYTHON_IMAGE=python@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534

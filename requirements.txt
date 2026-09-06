@@ -1,5 +1,5 @@
-# Pinned to the Django 4.1 dependency ceiling (see docs/CVE-TRIAGE.md for why
-# Django itself is pinned at 4.1.13 rather than upgraded).
+# Pinned to the Django 4.1 dependency ceiling (see the deploy repo's
+# docs/CVE-TRIAGE.md for why Django is pinned at 4.1.13 rather than upgraded).
 Django==4.1.13
 
 # 3.15.2 already requires Django>=4.2; 3.15.1 is the last release supporting Django>=3.0.

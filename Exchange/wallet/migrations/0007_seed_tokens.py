@@ -9,7 +9,7 @@
 #
 # actual_price is seeded at 0.0; the periodic django-q tasks
 # (download_historical_data / daily_data_download) backfill real prices from
-# CoinGecko once someone schedules them -- see docs/APP_CHANGES.md, they are
+# CoinGecko once someone schedules them -- see APP_CHANGES.md, they are
 # not scheduled anywhere in the upstream app.
 from django.db import migrations
 

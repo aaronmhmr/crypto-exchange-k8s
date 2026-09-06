@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,13 +27,22 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").strip().lower() in ("1", "true", "yes", "on")
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
+
+
+def env_list(name):
+    """Read a comma-separated env var into a list, ignoring blank entries."""
+    return [item.strip() for item in os.getenv(name, "").split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
 # Kubernetes' kube-probe sends the pod IP as the Host header (not a
 # hostname), so liveness/readiness probes 400 with DisallowedHost
 # unless the pod's own IP is allowed too.
-if os.getenv("POD_IP"):
-    ALLOWED_HOSTS.append(os.environ["POD_IP"])
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
+pod_ip = os.getenv("POD_IP")
+if pod_ip:
+    ALLOWED_HOSTS.append(pod_ip)
+
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
 
 # Application definition
 
