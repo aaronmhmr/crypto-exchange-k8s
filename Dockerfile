@@ -57,16 +57,18 @@ ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=Exchange.settings
 
-COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /app/Exchange /app/Exchange
+COPY --from=builder --chown=10001:10001 /opt/venv /opt/venv
+COPY --from=builder --chown=10001:10001 /app/Exchange /app/Exchange
 
 WORKDIR /app/Exchange
 
 # media/ upload subdirectories must be writable under a read-only root
 # filesystem (see k8s manifests); the baked-in default images
 # (media/bitcoin_icon.png, media/default_avatar.jpg) stay part of the image.
+# Only these two new, empty directories need an explicit chown -- everything
+# else came pre-owned via the COPY --chown above.
 RUN mkdir -p media/token_logo media/profile_pics \
-    && chown -R app:app /app/Exchange/media /app/Exchange/staticfiles
+    && chown 10001:10001 media/token_logo media/profile_pics
 
 USER 10001:10001
 EXPOSE 8000
