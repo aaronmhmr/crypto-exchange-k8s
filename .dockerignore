@@ -1,0 +1,15 @@
+.git
+.github
+.gitignore
+.env
+.env.*
+!.env.example
+k8s
+kind
+docs
+scripts
+*.md
+.idea
+__pycache__
+*.pyc
+Exchange/staticfiles
