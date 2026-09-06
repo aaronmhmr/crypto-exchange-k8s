@@ -1,0 +1,92 @@
+# Every entry here has a written justification in the deploy repo's
+# docs/CVE-TRIAGE.md (aaronmhmr/crypto-exchange-deploy) and an expiry -- this
+# file is a deliberate, reviewed allow-list, not a way to make CI green.
+# Re-run Trivy and re-evaluate at each expiry date.
+
+# --- Django 4.1.13 (pinned deliberately -- see docs/CVE-TRIAGE.md) ---
+# CVE-2025-64459: CRITICAL SQL injection. Real, unmitigated. Fixed only in
+# 4.2.26/5.1.14/5.2.8. Accepted short-term because upgrading Django is
+# app-level work, not "minimal changes to containerize" -- see the
+# production-readiness roadmap in README.md. Expiry: 2026-10-15 (re-evaluate;
+# do not let this sit past one month).
+CVE-2025-64459
+# CVE-2025-57833: HIGH SQLi in FilteredRelation. This app's ORM usage
+# (grepped) never constructs a FilteredRelation with user-controlled column
+# aliases -- not reachable in this codebase today, but still a real bug in
+# the pinned Django. Expiry: 2026-10-15.
+CVE-2025-57833
+# CVE-2025-64458: HIGH DoS, Windows-only code path. This app only ever runs
+# on Linux containers. Not reachable. Expiry: 2027-03-06 (long: genuinely
+# inapplicable to this deployment target, not a "we'll fix it later" item).
+CVE-2025-64458
+
+# --- perl-base (Debian base image, not invoked by this app) ---
+# CVE-2026-13221 (CRITICAL) and the perl-Archive-Tar/perl-IO-Compress/
+# Storable findings below: perl ships as part of debian-slim's base layer;
+# nothing in this image's CMD/entrypoint/dependency chain invokes perl.
+# Fixed by rebuilding on a newer base image once Debian ships a patch.
+# Expiry: 2026-10-15 (tied to the next scheduled base-image refresh).
+CVE-2026-13221
+CVE-2026-42496
+CVE-2026-8376
+CVE-2026-42497
+CVE-2026-48962
+CVE-2026-57432
+CVE-2026-57433
+CVE-2026-9538
+
+# --- util-linux family (bsdutils/libblkid1/liblastlog2-2/libmount1/
+# libsmartcols1/libuuid1/login/mount/util-linux) ---
+# All four CVEs require operations this container's process never performs
+# (external mount helpers, nsenter --join-cgroup, X-mount options) and none
+# are reachable from a non-root, no-new-privileges, single-process
+# container with no privileged mount capability. No fixed version published
+# by Debian yet as of this scan. Expiry: 2026-10-15.
+CVE-2026-76642
+CVE-2026-78408
+CVE-2026-78409
+CVE-2026-78410
+
+# --- Other base-image OS packages, no fixed version yet / not reachable ---
+# gzip: CVE-2026-41992 (LZH decompression -- this app never decompresses
+# untrusted .lzh input).
+CVE-2026-41992
+# libacl1: CVE-2026-54369 (symlink traversal in ACL functions -- not called
+# by this app or by Django/gunicorn).
+CVE-2026-54369
+# ncurses (libncursesw6/libtinfo6/ncurses-base/ncurses-bin): CVE-2025-69720,
+# terminal-UI buffer overflow. No interactive TTY app runs in this
+# container.
+CVE-2025-69720
+# libsqlite3-0: CVE-2026-11822/11824 (FTS5/heap overflow). This app's
+# DATABASES uses PostgreSQL exclusively; sqlite3 is an unused transitive
+# base-image dependency.
+CVE-2026-11822
+CVE-2026-11824
+# systemd (libsystemd0/libudev1): CVE-2026-16742 is a systemd-homed
+# privilege-escalation bug. systemd-homed does not run in this container
+# (no init system, no systemd services active).
+CVE-2026-16742
+
+# --- Vendored frontend static assets (upstream Bootstrap admin template,
+# not our code, not processed server-side) ---
+# TinyMCE 6.1.0: CVE-2026-47759/47761/47762 (client-side XSS in the rich
+# text editor widget). Fixing it means replacing a vendored third-party
+# asset, out of scope for "minimal changes to containerize". Verified
+# (grep across Exchange/) that dashboard/base.html and users/base.html
+# load tinymce.min.js on every page, but tinymce.init() is never called
+# anywhere in the codebase -- no editor instance is ever activated, so the
+# specific vectors (data-mce-* attribute injection, mce:protected comment
+# parsing) have no live editor surface to exploit. The script merely ships
+# to the browser inert. Expiry: 2026-12-01 (revisit if TinyMCE is ever
+# actually wired up to a textarea).
+CVE-2026-47759
+CVE-2026-47761
+CVE-2026-47762
+
+# --- Build-time-only Python packages ---
+# wheel 0.45.1 (CVE-2026-24049) and jaraco.context 5.3.0 (CVE-2026-23949)
+# are transitive pip/setuptools build tooling that ends up in the venv but
+# is never imported or executed at runtime by this app or by gunicorn.
+CVE-2026-24049
+CVE-2026-23949
