@@ -60,12 +60,18 @@ jobs:
       # commit SHA (or, on a git tag push, a semver tag) so a rollback is
       # always "redeploy this exact known-good reference", never
       # "whatever :latest happens to resolve to right now".
+      # sbom: true attaches a build-time inventory of every package in the
+      # image (SPDX format) as an attestation alongside the pushed manifest --
+      # inspect it later with `docker buildx imagetools inspect <ref> --format
+      # '{{ json .SBOM }}'`. This answers "was image X ever affected by CVE Y"
+      # for any future CVE without re-pulling or re-scanning the image.
       - name: Build and push (multi-arch)
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
+          sbom: true
           tags: |
             ${{ env.IMAGE }}:${{ steps.tags.outputs.tag }}
             ${{ startsWith(github.ref, 'refs/tags/v') && format('{0}:{1}', env.IMAGE, github.ref_name) || '' }}
